@@ -81,46 +81,61 @@ eosApiRestClient.getBlock("blockNumberOrId")
 #### Signing and pushing a transaction
 
 ```java
-/* Create the rest client */
-EosApiRestClient eosApiRestClient = EosApiClientFactory.newInstance("http://127.0.0.1:8888").newRestClient();
+        String CHAIN_ID_MAINET = "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906";
+        String CHAIN_ID_JUNGLE = "038f4b0fc8ff18a4f0842a8f0564611f6e96e8535901dd45e43ac8691a1c4dca";
+        
+        // Set the client
+        EosApiRestClient eosApiRestClient = EosApiClientFactory.newInstance("http://127.0.0.1:8899", "http://127.0.0.1:8888", "http://127.0.0.1:8888").newRestClient();
+        
+        // Open the wallet
+        eosApiRestClient.openWallet("default");
+        eosApiRestClient.unlockWallet("default", "PW5KhdSnrn1ubnUqg3xUNJ7NzjWNcaaM31Qdr2MgAmwrpj7rdLsoV");
+        
+        
+        /* Create the json array of arguments */
+        Map<String, String> args = new HashMap<String, String>(4);
+        args.put("user", "kye");
+        AbiJsonToBin data = eosApiRestClient.abiJsonToBin("hello", "hi", args);
 
-/* Create the json array of arguments */
-Map<String, String> args = new HashMap<>(4);
-args.put("from", "currency");
-args.put("to", "eosio");
-args.put("quantity", "44.0000 CUR");
-args.put("memo", "My First Transaction");
-AbiJsonToBin data = eosApiRestClient.abiJsonToBin("currency", "transfer", args);```
+        /* Get the head block */
+        Block block = eosApiRestClient.getBlock(eosApiRestClient.getChainInfo().getHeadBlockId());
+        String ts = block.getTimeStamp();
 
-/* Get the head block */
-Block block = eosApiRestClient.getBlock(eosApiRestClient.getChainInfo().getHeadBlockId());
+        /* Create Transaction Action Authorization */
+        TransactionAuthorization transactionAuthorization = new TransactionAuthorization();
+        transactionAuthorization.setActor("eosio");
+        transactionAuthorization.setPermission("active");
 
-/* Create Transaction Action Authorization */
-TransactionAuthorization transactionAuthorization = new TransactionAuthorization();
-transactionAuthorization.setActor("currency");
-transactionAuthorization.setPermission("active");
+        /* Create Transaction Action */
+        TransactionAction transactionAction = new TransactionAction();
+        transactionAction.setAccount("hello");
+        transactionAction.setName("hi");
+        transactionAction.setData(data.getBinargs());
+        //transactionAction.setHex_data(data.getBinargs());
+        transactionAction.setAuthorization(Collections.singletonList(transactionAuthorization));
+        
+        /* Create a transaction */
+        PackedTransaction packedTransaction = new PackedTransaction();
+        packedTransaction.setRefBlockPrefix(block.getRefBlockPrefix().toString());
+        packedTransaction.setRefBlockNum(block.getBlockNum().toString());
+        // expired after 3 minutes
+        String expiration = ZonedDateTime.now(ZoneId.of("GMT")).plusMinutes(3).truncatedTo(ChronoUnit.SECONDS).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        packedTransaction.setExpiration(expiration);
+        packedTransaction.setRegion("0");
+        packedTransaction.setMax_net_usage_words("0");
+        packedTransaction.setActions(Collections.singletonList(transactionAction));
 
-/* Create Transaction Action */
-TransactionAction transactionAction = new TransactionAction();
-transactionAction.setAccount("currency");
-transactionAction.setName("transfer");
-transactionAction.setData(data.getBinargs());
-transactionAction.setAuthorization(Collections.singletonList(transactionAuthorization));
+        /* Sign the Transaction */
+        
+        SignedPackedTransaction signedPackedTransaction 
+        = eosApiRestClient.signTransaction(packedTransaction, 
+        								Collections.singletonList("EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"), 
+        								"cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f");
 
-/* Create a transaction */
-PackedTransaction packedTransaction = new Transaction();
-packedTransaction.setRefBlockPrefix(block.getRefBlockPrefix().toString());
-packedTransaction.setRefBlockNum(block.getBlockNum().toString());
-packedTransaction.setExpiration("2018-05-10T18:38:19");
-packedTransaction.setRegion("0");
-packedTransaction.setMax_net_usage_words("0");
-packedTransaction.setActions(Collections.singletonList(transactionAction));
+        
+        /* Push the transaction */
+        PushedTransaction PushedTransaction = eosApiRestClient.pushTransaction("none", signedPackedTransaction);  
 
-/* Sign the Transaction */
-SignedTransaction signedTransaction = eosApiRestClient.signTransaction(packedTransaction, Collections.singletonList("EOS7LPJ7YnwYiEHbBLz96fNkt3kf6CDDdesV5EsWoc3u3DJy31V2y"), "chainId");
-
-/* Push the transaction */
-PushedTransaction = eosApiRestClient.pushTransaction("none", signedPackedTransaction);
 ```
 
 #### Notes
