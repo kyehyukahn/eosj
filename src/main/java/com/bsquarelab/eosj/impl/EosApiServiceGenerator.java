@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 
 public class EosApiServiceGenerator {
+	
+	private static boolean LOGGING = false;
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
     
@@ -25,11 +27,12 @@ public class EosApiServiceGenerator {
     private static Retrofit retrofit;
 
     public static <S> S createService(Class<S> serviceClass, String baseUrl) {
-    	HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-    	interceptor.setLevel(Level.BODY);
-
-    	httpClient.addInterceptor(interceptor);
-    	    	
+    	
+    	if (LOGGING) {
+	    	HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+	    	interceptor.setLevel(Level.BODY);	
+	    	httpClient.addInterceptor(interceptor);
+    	}
         builder.baseUrl(baseUrl);
         builder.client(httpClient.build());
         builder.addConverterFactory(JacksonConverterFactory.create());
