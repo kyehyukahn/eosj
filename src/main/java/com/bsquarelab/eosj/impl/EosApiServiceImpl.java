@@ -59,9 +59,38 @@ public class EosApiServiceImpl implements EosApiService {
 		return applyTx("modifytx", "txHash", Txs);
 	}
 
-	public String getArtInfo() {return "";}
-	public String getHoldersList() {return "";}
-	public String getTransactions() {return "";}
+	public String getArtInfo() {
+		return getTable("artHash");
+    }
+	
+	public String getHoldersList() {
+		return getTable("ownerHash");
+	}
+	
+	public String getTransactions() {
+		return getTable("currentTxHash");
+	}
+	
+	private String getTable(String column) {
+		 EosApiRestClient eosApiRestClient = EosApiClientFactory.newInstance("http://127.0.0.1:8900", "http://127.0.0.1:8888", "http://127.0.0.1:8888").newRestClient();
+	     eosApiRestClient.openWallet("default");
+	     eosApiRestClient.unlockWallet("default", "PW5J2K9NoRmLoFZxbk79Qw6h7qRzTjyKcw7fwK38YgRrqJg1RiNoh");
+	     TableRow tr = eosApiRestClient.getTableRows("art1", "art1", "artinfo");
+	     
+	     List<Map<String, ?>> list;
+	     list = tr.getRows();
+	     String[] row = list.get(0).values().toString().split(",");
+	     
+	     if(column.equals("ownerHash")) {
+	    	 return row[0];
+	     }else if(column.equals("currentTxHash")) {
+	    	 return row[1];
+	     }else if(column.equals("artHash")) {
+	    	 return row[2];
+	     }else {
+	    	 return "";
+	     }
+	}
 	
 	private String applyTx(String func, String param, String value) {
         // Set the client
