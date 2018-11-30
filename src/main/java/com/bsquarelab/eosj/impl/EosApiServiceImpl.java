@@ -79,14 +79,15 @@ public class EosApiServiceImpl implements EosApiService {
 	     
 	     List<Map<String, ?>> list;
 	     list = tr.getRows();
-	     String[] row = list.get(0).values().toString().split(",");
+	     
+	     //String[] row = list.get(0).values().toString().split(",");
 	     
 	     if(column.equals("ownerHash")) {
-	    	 return row[0];
+	    	 return (String)list.get(0).get("ownerHash");
 	     }else if(column.equals("currentTxHash")) {
-	    	 return row[1];
+	    	 return (String)list.get(0).get("currentTxHash");
 	     }else if(column.equals("artHash")) {
-	    	 return row[2];
+	    	 return (String)list.get(0).get("artHash");
 	     }else {
 	    	 return "";
 	     }
