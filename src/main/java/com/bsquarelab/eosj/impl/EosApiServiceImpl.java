@@ -72,10 +72,10 @@ public class EosApiServiceImpl implements EosApiService {
 	}
 	
 	private String getTable(String column) {
-		 EosApiRestClient eosApiRestClient = EosApiClientFactory.newInstance("http://127.0.0.1:8900", "http://127.0.0.1:8888", "http://127.0.0.1:8888").newRestClient();
+		 EosApiRestClient eosApiRestClient = EosApiClientFactory.newInstance("http://127.0.0.1:8899", "http://127.0.0.1:8888", "http://127.0.0.1:8888").newRestClient();
 	     eosApiRestClient.openWallet("default");
-	     eosApiRestClient.unlockWallet("default", "PW5J2K9NoRmLoFZxbk79Qw6h7qRzTjyKcw7fwK38YgRrqJg1RiNoh");
-	     TableRow tr = eosApiRestClient.getTableRows("art1", "art1", "artinfo");
+	     eosApiRestClient.unlockWallet("default", "PW5KhdSnrn1ubnUqg3xUNJ7NzjWNcaaM31Qdr2MgAmwrpj7rdLsoV");
+	     TableRow tr = eosApiRestClient.getTableRows("prorata", "prorata", "artinfo");
 	     
 	     List<Map<String, ?>> list;
 	     list = tr.getRows();

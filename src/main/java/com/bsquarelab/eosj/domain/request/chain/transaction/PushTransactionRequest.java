@@ -36,7 +36,7 @@ public class PushTransactionRequest {
         String signedTransactionString = "";
 		try {
 			signedTransactionString = oMapper.writeValueAsString(signedTransaction);
-	        System.out.println( "Signed Transaction : " + signedTransactionString);
+	        //System.out.println( "Signed Transaction : " + signedTransactionString);
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -53,7 +53,7 @@ public class PushTransactionRequest {
         = new com.bsquarelab.eosj.blockchain.chain.PackedTransaction(_signedTransaction, com.bsquarelab.eosj.blockchain.chain.PackedTransaction.CompressType.none);
         
         this.packed_trx = packedTransaction.getPackedTrx();
-        System.out.println( "packed trx : " + packed_trx);
+        // System.out.println( "packed trx : " + packed_trx);
     }
 
     public String getCompression() {
