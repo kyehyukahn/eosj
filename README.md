@@ -138,6 +138,22 @@ eosApiRestClient.getBlock("blockNumberOrId")
 
 ```
 
+'''java
+   		String wallet = "default";
+    	String wallet_password = "PW5KhdSnrn1ubnUqg3xUNJ7NzjWNcaaM31Qdr2MgAmwrpj7rdLsoV";
+    	String account = "prorata";
+    	String account_password = "EOS8f3xTQz16gM51GnmFWoE2Mwwyg7rVRq691sjbYfHTRrJYqX1cG";
+    	EosApiService eosARTApiService 
+        = new EosApiServiceImpl(wallet, wallet_password, account, account_password );
+        System.out.println(eosARTApiService.setArtHash("hash03"));
+        System.out.println(eosARTApiService.setHoldersHash("Users03"));
+        System.out.println(eosARTApiService.addTransactionsHash("Txs03"));
+        System.out.println(eosARTApiService.getArtHash());
+        System.out.println(eosARTApiService.getHoldersHash());
+        System.out.println(eosARTApiService.getTransactionsHash());            
+'''
+
+
 #### Notes
 * All methods are synchronous and blocking.
 * All methods will throw a catchable EOSApiException.
