@@ -36,45 +36,55 @@ public class EosApiServiceImpl implements EosApiService {
     private String _wallet;
     private String _wallet_password;
     private String _account;
+    private String _account_address;
     
+    private EosApiRestClient _eosApiRestClient;
 
-    public EosApiServiceImpl(String wallet, String password, String account){
+    public EosApiServiceImpl(String wallet, String password, String account, String address){
     	_wallet = wallet;
     	_wallet_password = password;
     	_account = account;
+    	_account_address = address;
+    	prepareEOSApi(_wallet, _wallet_password, _account);
     }
 
     // eosio::action void modifyart(string artHash)
-    public String setARTInfo(String info) {
+    public String setArtHash(String info) {
     	return applyTx("modifyart", "artHash", info);
 	}
     
 	// void modifyown(string owHash)
-	public String setHoldersList (String holdersList) {
+	public String setHoldersHash (String holdersList) {
 		return applyTx("modifyown", "owHash", holdersList);
 	}
 
 	// eosio::action void modifytx(string txHash)
-	public String setTransactions(String Txs) {
+	public String addTransactionsHash(String Txs) {
 		return applyTx("modifytx", "txHash", Txs);
 	}
 
-	public String getArtInfo() {
+	public String getArtHash() {
 		return getTable("artHash");
     }
 	
-	public String getHoldersList() {
+	public String getHoldersHash() {
 		return getTable("ownerHash");
 	}
 	
-	public String getTransactions() {
+	public String getTransactionsHash() {
 		return getTable("currentTxHash");
 	}
 	
+	private EosApiRestClient prepareEOSApi(String wallet, String password, String account) {
+		_eosApiRestClient = EosApiClientFactory.newInstance("http://127.0.0.1:8899", "http://127.0.0.1:8888", "http://127.0.0.1:8888").newRestClient();
+		_eosApiRestClient.openWallet(wallet);
+		_eosApiRestClient.unlockWallet(wallet, password);
+		
+		return _eosApiRestClient;
+	}
+	
 	private String getTable(String column) {
-		 EosApiRestClient eosApiRestClient = EosApiClientFactory.newInstance("http://127.0.0.1:8899", "http://127.0.0.1:8888", "http://127.0.0.1:8888").newRestClient();
-	     eosApiRestClient.openWallet("default");
-	     eosApiRestClient.unlockWallet("default", "PW5KhdSnrn1ubnUqg3xUNJ7NzjWNcaaM31Qdr2MgAmwrpj7rdLsoV");
+		 EosApiRestClient eosApiRestClient = _eosApiRestClient;
 	     TableRow tr = eosApiRestClient.getTableRows("prorata", "prorata", "artinfo");
 	     
 	     List<Map<String, ?>> list;
@@ -95,17 +105,13 @@ public class EosApiServiceImpl implements EosApiService {
 	
 	private String applyTx(String func, String param, String value) {
         // Set the client
-        EosApiRestClient eosApiRestClient = EosApiClientFactory.newInstance("http://127.0.0.1:8899", "http://127.0.0.1:8888", "http://127.0.0.1:8888").newRestClient();
-        
-        // Open the wallet
-        eosApiRestClient.openWallet("default");
-        eosApiRestClient.unlockWallet("default", "PW5KhdSnrn1ubnUqg3xUNJ7NzjWNcaaM31Qdr2MgAmwrpj7rdLsoV");
+        EosApiRestClient eosApiRestClient = _eosApiRestClient;
         
         
         /* Create the json array of arguments */
         Map<String, String> args = new HashMap<String, String>(4);
         args.put(param, value);
-        AbiJsonToBin data = eosApiRestClient.abiJsonToBin("prorata", func, args);
+        AbiJsonToBin data = eosApiRestClient.abiJsonToBin(_account, func, args);
 
         /* Get the head block */
         Block block = eosApiRestClient.getBlock(eosApiRestClient.getChainInfo().getHeadBlockId());
@@ -113,12 +119,12 @@ public class EosApiServiceImpl implements EosApiService {
 
         /* Create Transaction Action Authorization */
         TransactionAuthorization transactionAuthorization = new TransactionAuthorization();
-        transactionAuthorization.setActor("prorata");
+        transactionAuthorization.setActor(_account);
         transactionAuthorization.setPermission("active");
 
         /* Create Transaction Action */
         TransactionAction transactionAction = new TransactionAction();
-        transactionAction.setAccount("prorata");
+        transactionAction.setAccount(_account);
         transactionAction.setName(func);
         transactionAction.setData(data.getBinargs());
         transactionAction.setAuthorization(Collections.singletonList(transactionAuthorization));
@@ -138,7 +144,7 @@ public class EosApiServiceImpl implements EosApiService {
         
         SignedPackedTransaction signedPackedTransaction 
         = eosApiRestClient.signTransaction(packedTransaction, 
-        								Collections.singletonList("EOS8f3xTQz16gM51GnmFWoE2Mwwyg7rVRq691sjbYfHTRrJYqX1cG"), 
+        								Collections.singletonList(_account_address), 
         								"cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f");
         /* Push the transaction */
         PushedTransaction pushedTransaction = eosApiRestClient.pushTransaction("none", signedPackedTransaction);  
