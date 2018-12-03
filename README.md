@@ -138,7 +138,7 @@ eosApiRestClient.getBlock("blockNumberOrId")
 
 ```
 
-'''java
+```java
    		String wallet = "default";
     	String wallet_password = "PW5KhdSnrn1ubnUqg3xUNJ7NzjWNcaaM31Qdr2MgAmwrpj7rdLsoV";
     	String account = "prorata";
@@ -151,7 +151,7 @@ eosApiRestClient.getBlock("blockNumberOrId")
         System.out.println(eosARTApiService.getArtHash());
         System.out.println(eosARTApiService.getHoldersHash());
         System.out.println(eosARTApiService.getTransactionsHash());            
-'''
+```
 
 
 #### Notes
